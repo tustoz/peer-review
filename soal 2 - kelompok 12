@@ -1,0 +1,135 @@
+#BFS
+
+from collections import deque
+
+def bfs_route(matriks):
+    n = len(matriks)
+    #menyimpan posisi (x, y), jumlah harta saat ini (total), dan rute yang ditempuh (route)
+    queue = deque([(0, 0, matriks[0][0], '')])
+    all_route = []  #list untuk menyimpan semua rute dari awal -> akhir
+    best_route = []  #list untuk menyimpan rute-rute terbaik dengan harta terbesar
+    max_treasure = 0  #untuk menyimpan nilai harta terbesar yang ditemukan
+    while queue:
+        #ambil elemen pertama dari queue
+        x, y, total, route = queue.popleft()
+        if x == n - 1 and y == n - 1:
+            #simpan jalur dan total harta yang ditemukan dalam all_route jika x dan y sudah mencapai n-1
+            all_route.append((route, total))
+            #cek jalur ini menghasilkan harta lebih banyak daripada harta maksimal yang udah ditemukan atau belum
+            if total > max_treasure:
+                #jika lebih besar berarti nilai harata maksimal nya diperbarui
+                max_treasure = total
+                #berarti best route nya jadi rute yang ini
+                best_route = [route]
+            #kalo total hartanya sama dengan total harta terbanyak yang udah ditemukan, tambahkan ke dalam list bestroute
+            elif total == max_treasure:
+                best_route.append(route)
+            continue
+        #jika masih bisa bergerak kebawah dan berada dalam jangkauan N, gerak kebawah lalu tambahkan harta dari angka yang baru kita pilih dan
+        #tambahkan B pada rute
+        if x + 1 < n:
+            queue.append((x + 1, y, total + matriks[x + 1][y], route + 'B'))
+         #jika masih bisa bergerak kebawah dan berada dalam jangkauan N, gerak kebawah lalu tambahkan harta dari angka yang baru kita pilih dan
+        #tambahkan K pada rute
+        if y + 1 < n:
+            queue.append((x, y + 1, total + matriks[x][y + 1], route + 'K'))
+    #mengembalikan semua rute, rute-rute terbaik, dan nilai harta terbesar yang ditemukan
+    return all_route, best_route, max_treasure
+
+#fungsi untuk meminta input matriks dari pengguna
+def input_matriks():
+    n = int(input("Masukkan ukuran matriks : "))
+    matriks = []  #list untuk menyimpan matriks
+    #meminta input untuk setiap baris dari matriks
+    for i in range(n):
+        row = list(map(int, input(f"Petak Ladang {i+1} : ").split()))
+        matriks.append(row)
+    return matriks
+
+#meminta input matriks dari pengguna dan menjalankan BFS
+matriks = input_matriks()
+all_route, best_route, max_treasure = bfs_route(matriks)
+
+#menampilkan semua rute yang ditemukan beserta total hartanya
+print("Semua rute yang mungkin beserta total hartanya : ")
+for route, total_treasure in all_route:
+    print(f"Rute: {route} dengan Total Harta: {total_treasure}")
+print("===============================================")
+#menampilkan nilai harta terbesar dan semua rute terbaik yang menghasilkan nilai tersebut
+print(f"Harta terbesar : {max_treasure}")
+print("Rute terbaik : ")
+for route in best_route:
+    print(route)
+
+
+
+
+
+
+#DFS
+
+def dfs(matriks, x, y, total, route, all_route, best_route, max_treasure):
+    n = len(matriks)
+    # jika mencapai posisi akhir tambahkan jalur dan total harta yang dikumpulkan ke all_route
+    if x == n - 1 and y == n - 1:
+        all_route.append((route, total))
+        # periksa apakah jalur ini menghasilkan harta lebih banyak daripada harta maksimal yang sudah ditemukan
+        if total > max_treasure[0]:
+            # jika lebih besar, perbarui nilai harta maksimal
+            max_treasure[0] = total
+            # hapus semua jalur terbaik sebelumnya karena ada yang lebih baik
+            best_route.clear()
+            # tambahkan jalur baru ini sebagai jalur terbaik
+            best_route.append(route)
+        # jika harta yang dikumpulkan sama dengan harta maksimal, tambahkan ke dalam list rute terbaik
+        elif total == max_treasure[0]:
+            best_route.append(route)
+        return
+
+    # jika bisa bergerak ke bawah dan berada dalam jangkauan matriks tambahkan nilai dari posisi baru ke dalam total dan tambahkan B ke rute
+    if x + 1 < n:
+        dfs(matriks, x + 1, y, total + matriks[x + 1][y], route + 'B', all_route, best_route, max_treasure)
+    # jika bisa bergerak ke kanan dan berada dalam jangkauan matriks tambahkan nilai dari posisi baru ke dalam total dan tambahkan K ke rute
+    if y + 1 < n:
+        dfs(matriks, x, y + 1, total + matriks[x][y + 1], route + 'K', all_route, best_route, max_treasure)
+
+
+def find_all_paths_dfs(matriks):
+    n = len(matriks)
+    all_route = []  # untuk menyimpan semua rute yang ditemukan dari awal ke akhir
+    best_route = []  # untuk menyimpan rute terbaik yang menghasilkan harta maksimal
+    max_treasure = [0]  # untuk menyimpan nilai harta terbesar yang ditemukan
+
+    # memulai DFS dari titik awal (0,0) dengan nilai harta di posisi tersebut dan jalur kosong
+    dfs(matriks, 0, 0, matriks[0][0], '', all_route, best_route, max_treasure)
+
+    # kembalikan semua rute yang ditemukan, rute terbaik, dan nilai harta terbesar
+    return all_route, best_route, max_treasure[0]
+
+
+# fungsi untuk meminta input matriks dari pengguna
+def input_matriks():
+    n = int(input("Masukkan ukuran matriks : "))
+    matriks = []
+    # neminta input untuk setiap baris dari matriks
+    for i in range(n):
+        # nembaca setiap baris sebagai list angka
+        row = list(map(int, input(f"Petak Ladang {i + 1} : ").split()))
+        matriks.append(row)
+    return matriks
+
+
+# meminta input matriks dari pengguna menggunakan fungsi input_matriks
+matriks = input_matriks()
+# mencari semua jalur dan jalur terbaik menggunakan DFS
+all_route, best_route, max_treasure = find_all_paths_dfs(matriks)
+
+# menampilkan semua rute yang ditemukan dan total harta yang dikumpulkan dari setiap rute
+print("Semua rute yang ada dan total harta yang ditemukan : ")
+for route, total_treasure in all_route:
+    print(f"Rute: {route} dengan Total Harta: {total_treasure}")
+print("===============================================")
+# Menampilkan nilai harta terbesar dan semua rute terbaik yang menghasilkan nilai tersebut
+print(f"Harta terbesar : {max_treasure}")
+for route in best_route:
+    print(f"Rute Terbaik : {route}")
