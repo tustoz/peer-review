@@ -1,0 +1,78 @@
+inp = input()
+berhasil = False
+
+# Fungsi untuk mengubah lampu ke n 
+def change(n):
+    if hasil[n] == "1":
+        hasil[n] = "0"
+
+    else:
+        hasil[n] = "1"
+
+# Fungsi untuk mengubah lampu ke n-1, n dan n+1
+def changes(n):
+    if 0 < n < len(inp)-1:
+        change(n-1)
+        change(n)
+        change(n+1)
+
+    elif n == 0:
+        change(n)
+        change(n+1)
+
+    elif n == len(inp)-1:
+        change(n-1)
+        change(n)
+
+# Fungsi untuk mencari kombinasi-kombinasi indeks saklar yang dapat dimatikan oleh program
+def kombinasi(n):
+    if n == 0:
+        return [[n]]
+    
+    else:
+        before = kombinasi(n-1)
+        copy = []
+
+        for i in before:
+            copy.append(i.copy())
+
+        for i in range(len(copy)):
+            copy[i].append(n)
+        
+        copy.extend(before)
+        copy.append([n])
+
+        return copy
+
+# Fungsi untuk mengecek apakah semua lampu sudah mati atau belum
+def check(hasil):
+    for i in hasil:
+        if i != "0":
+            return False
+        
+    return True
+
+
+perubahan = kombinasi(len(inp)-1)
+
+# Fungsi untuk mengubah saklar sesuai denga kombinasi-konmbinasi indeks yang sudah didapatkan sebelumnya
+for komb in perubahan:
+    hasil = [i for i in inp]
+
+    for operasi in komb:
+        changes(operasi)
+
+    if check(hasil):
+        langkah = komb
+        berhasil = True
+        break
+
+
+if berhasil:
+    print(f"{len(langkah)} operasi diperlukan.")
+
+    for i in range(len(langkah)):
+        print(f"Operasi #{i+1}: k = {langkah[i]}")
+
+else:
+    print("MUSTAHIL")
