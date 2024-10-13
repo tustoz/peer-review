@@ -1,0 +1,94 @@
+# BAGI 3 TIMBANG 2 - FINAL RESULT
+
+# https://chatgpt.com/c/67024fae-bd98-8001-aa0a-ebecdb219b43
+
+import random
+
+def Scale(Left, Right):
+    global fake_coin
+    if fake_coin in Left:
+        return "left"
+    elif fake_coin in Right:
+        return "right"
+    return "balance"
+
+def find_fake(l):
+    while len(l) > 1:
+        n = len(l)
+
+        # untuk handle jika koin tersisa 2:
+        if n == 2:
+            Left = l[0:1]
+            Right = l[1:]
+            result = Scale(Left, Right)
+            if result == "left":
+                l = Left
+            elif result == "right":
+                l = Right
+            else:
+                l = [-1]
+            continue
+
+        partition = n // 3
+        mod = n % 3
+
+        coin_left = []
+        if mod == 0:
+            Left = l[:partition]
+            Mid = l[partition:partition * 2]
+            Right = l[partition * 2:]
+        elif mod != 0:
+            Left = l[:partition]
+            Mid = l[partition:partition * 2]
+            Right = l[partition * 2:n - mod]
+            coin_left = l[-(n % 3):]
+
+        # melakukan penimbangan 2 kali:
+        first_scale = Scale(Left, Mid)
+        second_scale = Scale(Mid, Right)
+        if first_scale == "left" and second_scale == "balance":
+            l = Left
+        elif first_scale == "right" and second_scale == "left":
+            l = Mid
+        elif first_scale == "balance" and second_scale == "right":
+            l = Right
+        else:  # kalau semua hasil penimbangan seimbang:
+            if coin_left: # jika ada koin yang tersisa setelah pembagian koin:
+                l = Right + coin_left
+            else: # jika tidak ada koin tersisa:
+                l = [-1]
+
+    # Bagian yang diubah dan diperoleh dari CHATGPT (karena sempat error):
+    if l[0] == -1: # jika -1 berarti koin palsu tidak ditemukan:
+        print("there is no fake coin.")
+    else: # jika bukan -1, maka koin ditemukan:
+        print("found! the fake coin is", l[0])
+
+
+if __name__ == "__main__":
+    # menentukan jumlah koin:
+    N = int(input())
+
+    # mengisi coin_list dengan koin:
+    coin_list = []
+    for i in range(N):
+        coin_list.append(i)
+    print("list coin:")
+    print(coin_list)
+
+    # ambil fake coin random
+    if random.random() < 0.2: # peluang generate fake coin tidak ada dalam list sebesar 20%
+        fake_coin = random.randint(N, N * 10)
+    else:
+        idx_fake_coin = random.randint(0,N-1)
+        fake_coin = coin_list[idx_fake_coin]
+    print("fake coin =", fake_coin)
+
+    # menentukan letak fake coinnya:
+    find_fake(coin_list)
+
+# “Di hadapan TUHAN yang hidup, saya menegaskan bahwa saya tidak memberikan maupun menerima bantuan apa pun—baik lisan, tulisan,
+# maupun elektronik—di dalam ujian ini selain daripada apa yang telah diizinkan oleh pengajar, dan tidak akan menyebarkan baik soal
+# maupun jawaban ujian kepada pihak lain.”
+
+# Naftali, Devlin, Matthew Layadi, Makarios
