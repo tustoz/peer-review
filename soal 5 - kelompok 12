@@ -1,0 +1,80 @@
+class Point:
+    def __init__(self, x, y):
+        self.x = x  # Menginisialisasi koordinat x dari titik
+        self.y = y  # Menginisialisasi koordinat y dari titik
+
+
+class TreeNode:
+    def __init__(self, point):
+        self.point = point  # Menyimpan titik yang menjadi isi node
+        self.left = None  # Inisialisasi anak kiri sebagai None
+        self.right = None  # Inisialisasi anak kanan sebagai None
+
+
+class BalancedBST:
+    def __init__(self):
+        self.root = None  # Menginisialisasi root pohon sebagai None
+    def insert(self, point):
+        self.root = self._insert(self.root, point)  # Memanggil fungsi _insert untuk menambahkan titik
+    def _insert(self, node, point):
+        if node is None:
+            return TreeNode(point)  # Jika node kosong, buat node baru dengan titik
+        if point.y < node.point.y:
+            node.left = self._insert(node.left, point)  # Masukkan titik ke anak kiri jika y lebih kecil
+        else:
+            node.right = self._insert(node.right, point)  # Masukkan titik ke anak kanan jika y lebih besar
+        return node  # Kembalikan node yang telah diperbarui
+    def range_query(self, y_min, y_max):
+        return self._range_query(self.root, y_min,
+                                 y_max)  # Memanggil fungsi _range_query untuk mendapatkan titik dalam rentang
+    def _range_query(self, node, y_min, y_max):
+        if node is None:
+            return []  # Jika node kosong, kembalikan list kosong
+        points = []  # List untuk menyimpan titik yang sesuai
+        if y_min <= node.point.y <= y_max:
+            points.append(node.point)  # Tambahkan titik ke list jika dalam rentang
+        if node.point.y > y_min:
+            points.extend(self._range_query(node.left, y_min, y_max))  # Cek anak kiri jika y lebih besar dari y_min
+        if node.point.y < y_max:
+            points.extend(self._range_query(node.right, y_min, y_max))  # Cek anak kanan jika y lebih kecil dari y_max
+        return points  # Kembalikan list titik yang ditemukan
+
+def distSquared(p1, p2):
+    return (p1.x - p2.x) ** 2 + (p1.y - p2.y) ** 2  # Menghitung jarak kuadrat antara dua titik
+
+def closestUtil(points):
+    n = len(points)  # Menghitung jumlah titik
+    if n <= 3:
+        return bruteForce(points)  # Jika titik kurang dari atau sama dengan 3, gunakan brute force
+    points.sort(key=lambda p: p.x)  # Urutkan titik berdasarkan koordinat x
+    mid = n // 2  # Tentukan titik tengah
+    midPoint = points[mid]  # Ambil titik di tengah sebagai midpoint
+    left_points = points[:mid]  # Titik di sebelah kiri dari midpoint
+    right_points = points[mid:]  # Titik di sebelah kanan dari midpoint
+    left_bst = BalancedBST()  # Inisialisasi BST untuk titik kiri
+    right_bst = BalancedBST()  # Inisialisasi BST untuk titik kanan
+    for point in left_points:
+        left_bst.insert(point)  # Masukkan titik kiri ke dalam BST kiri
+    for point in right_points:
+        right_bst.insert(point)  # Masukkan titik kanan ke dalam BST kanan
+    d = float("inf")  # Inisialisasi jarak terpendek dengan nilai tak terhingga
+    for point in left_points:
+        strip_points = right_bst.range_query(point.y - d, point.y + d)  # Query rentang untuk titik dalam strip
+        for other_point in strip_points:
+            d = min(d,
+                    distSquared(point, other_point))  # Perbarui jarak terpendek jika ditemukan jarak yang lebih kecil
+    for point in right_points:
+        strip_points = left_bst.range_query(point.y - d, point.y + d)  # Query rentang untuk titik dalam strip
+        for other_point in strip_points:
+            d = min(d,
+                    distSquared(point, other_point))  # Perbarui jarak terpendek jika ditemukan jarak yang lebih kecil
+    return d  # Kembalikan jarak terpendek yang ditemukan
+
+
+def closest(points):
+    return closestUtil(points)  # Memanggil fungsi utilitas untuk mencari jarak terpendek
+
+
+# Test case
+points = [Point(2, 3), Point(12, 30), Point(40, 50), Point(5, 1), Point(12, 10), Point(3, 4)]  # Daftar titik
+print("Jarak terpendek adalah:", closest(points))  # Output akhir
